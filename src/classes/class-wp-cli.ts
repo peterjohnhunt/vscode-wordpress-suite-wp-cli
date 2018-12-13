@@ -1,4 +1,4 @@
-import { Disposable } from 'vscode';
+import { Disposable, EventEmitter, Event } from 'vscode';
 import WP from 'wp-cli';
 import commandExists from 'command-exists';
 
@@ -9,7 +9,11 @@ export class WP_CLI{
     private _config: Config;
 
     private wp;
-    private initialized: boolean = false;
+
+    private _onDidChangeData: EventEmitter<undefined> = new EventEmitter<undefined>();
+    readonly onDidChangeData: Event<undefined> = this._onDidChangeData.event;
+
+    version: string;
 
     constructor(site){
         this._config = new Config();
@@ -21,16 +25,24 @@ export class WP_CLI{
                 WP.discover({ path: site.getRoot() }, (wp) => {
                     this.wp = wp;
 
-                    this.initialize();
+                    this.setVersion();
                 })
             }
         });
     }
 
-    public initialize(){
+    private setVersion(){
         this.wp.core.version((err,version) => {
             if ( err ) return;
+
+            this.version = version;
+            
+            this._onDidChangeData.fire();
         });
+    }
+
+    public getVersion(){
+        return this.version || 'loading';
     }
 
     public dispose() {

@@ -21,7 +21,16 @@
         "peterjohnhunt.wordpress-suite"
     ],
     "main": "./out/extension",
-    "contributes": {},
+    "contributes": {
+        "views": {
+            "wordpress-suite": [
+                {
+                    "id": "wp-cli",
+                    "name": "WP CLI"
+                }
+            ]
+        }
+    },
     "scripts": {
         "vscode:prepublish": "npm run compile",
         "compile": "tsc -p ./",

@@ -1,17 +1,14 @@
 'use strict';
 import { ExtensionContext, extensions } from 'vscode';
-import { WP_CLI } from './classes/class-wp-cli';
+import { Controller } from './classes/class-controller';
+import { Explorer } from './classes/class-explorer';
 
 export function activate(context: ExtensionContext) {
-    let api = extensions.getExtension('peterjohnhunt.wordpress-suite').exports;
+    let api        = extensions.getExtension('peterjohnhunt.wordpress-suite').exports;
+    let explorer   = new Explorer(api, context);
+    let controller = new Controller(api, explorer);
 
-    const sites = api.getSites();
-    if (sites.length) {
-        for (let site of sites){
-            site.wp_cli = new WP_CLI(site);
-            context.subscriptions.push(site.watcher);
-        }
-    }
+    context.subscriptions.push(controller);
 }
 
 export function deactivate() {
