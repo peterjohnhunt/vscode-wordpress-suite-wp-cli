@@ -46,6 +46,7 @@
         "@types/mocha": "^2.2.42"
     },
     "dependencies": {
+        "async": "^2.6.1",
         "command-exists": "^1.2.8",
         "wp-cli": "0.0.5"
     }
