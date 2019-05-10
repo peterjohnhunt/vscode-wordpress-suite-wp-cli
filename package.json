@@ -1,53 +1,100 @@
 {
-    "name": "wordpress-suite-wp-cli",
-    "displayName": "WordPress Suite | WP CLI",
-    "description": "",
-    "version": "0.0.2",
-    "publisher": "peterjohnhunt",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/peterjohnhunt/vscode-wordpress-suite-wp-cli.git"
-    },
-    "engines": {
-        "vscode": "^1.29.0"
-    },
-    "categories": [
-        "Other"
-    ],
-    "activationEvents": [
-        "workspaceContains:**/*.php"
-    ],
-    "extensionDependencies": [
-        "peterjohnhunt.wordpress-suite"
-    ],
-    "main": "./out/extension",
-    "contributes": {
-        "views": {
-            "wordpress-suite": [
+	"name": "wordpress-suite-wp-cli",
+	"displayName": "WordPress Suite | WP CLI",
+	"description": "",
+	"version": "0.0.2",
+	"publisher": "peterjohnhunt",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/peterjohnhunt/vscode-wordpress-suite-wp-cli.git"
+	},
+	"engines": {
+		"vscode": "^1.29.0"
+	},
+	"categories": [
+		"Other"
+	],
+	"activationEvents": [
+		"workspaceContains:**/*.php"
+	],
+	"extensionDependencies": [
+		"peterjohnhunt.wordpress-suite"
+	],
+	"main": "./out/extension",
+	"contributes": {
+		"views": {
+			"wordpress-suite": [
+				{
+					"id": "wp-cli",
+					"name": "WP CLI"
+				}
+			]
+		},
+        "commands": [
+            {
+                "command": "wpcli.sections.refresh",
+                "title": "Refresh",
+                "category": "WP CLI"
+            },
+            {
+                "command": "wpcli.plugins.add",
+                "title": "Add Plugin",
+                "category": "WP CLI"
+            },{
+                "command": "wpcli.plugins.update",
+                "title": "Update Plugin",
+                "category": "WP CLI"
+            }
+        ],
+        "menus": {
+            "view/title": [
                 {
-                    "id": "wp-cli",
-                    "name": "WP CLI"
+                    "command": "wpcli.sections.refresh",
+                    "when": "view == wp-cli",
+                    "group": "z_commands@1"
+                },
+                {
+                    "command": "wpcli.plugins.add",
+                    "when": "view == wp-cli",
+                    "group": "z_commands@1"
+                }
+            ],
+            "view/item/context": [
+                {
+                    "command": "wpcli.sections.refresh",
+                    "when": "view == wp-cli && viewItem == section",
+                    "group": "z_commands@1"
+                },
+                {
+                    "command": "wpcli.plugins.update",
+                    "when": "view == wp-cli && viewItem == plugin",
+                    "group": "z_commands@1"
                 }
             ]
         }
-    },
-    "scripts": {
-        "vscode:prepublish": "npm run compile",
-        "compile": "tsc -p ./",
-        "watch": "tsc -watch -p ./",
-        "postinstall": "node ./node_modules/vscode/bin/install",
-        "test": "npm run compile && node ./node_modules/vscode/bin/test"
-    },
-    "devDependencies": {
-        "typescript": "^2.6.1",
-        "vscode": "^1.1.6",
-        "tslint": "^5.8.0",
-        "@types/node": "^7.0.43",
-        "@types/mocha": "^2.2.42"
-    },
-    "dependencies": {
-        "async": "^2.6.1",
-        "command-exists": "^1.2.8",
-        "wp-cli": "0.0.5"
-    }
+	},
+	"scripts": {
+		"vscode:prepublish": "npm run compile",
+		"compile": "tsc -p ./",
+		"watch": "tsc -watch -p ./",
+		"postinstall": "node ./node_modules/vscode/bin/install",
+		"test": "npm run compile && node ./node_modules/vscode/bin/test"
+	},
+	"devDependencies": {
+		"typescript": "^2.6.1",
+		"vscode": "^1.1.6",
+		"tslint": "^5.8.0",
+		"@types/node": "^7.0.43",
+		"@types/mocha": "^2.2.42"
+	},
+	"dependencies": {
+		"async": "^2.6.1",
+		"command-exists": "^1.2.8",
+		"wp-cli": "0.0.5"
+	},
+	"__metadata": {
+		"id": "3b3a1cfb-81e9-47c1-a4d4-d5603b559e63",
+		"publisherDisplayName": "peterjohnhunt",
+		"publisherId": "2077a556-4feb-471d-b089-67e06b5bdf6d"
+	}
 }

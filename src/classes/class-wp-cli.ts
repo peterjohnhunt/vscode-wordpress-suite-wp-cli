@@ -1,185 +1,128 @@
-import { Disposable, EventEmitter, Event } from 'vscode';
-import { exec } from 'child_process';
-import async from 'async';
-
 import WP from 'wp-cli';
 import commandExists from 'command-exists';
 
-import * as path from 'path';
-import * as fs from 'fs';
+import { Base } from './abstracts/class-base';
+import { Info } from './wp-cli/class-info';
+import { Config } from './wp-cli/class-config';
+import { PostTypes } from './wp-cli/class-posttypes';
+import { Taxonomies } from './wp-cli/class-taxonomies';
+import { Roles } from './wp-cli/class-roles';
+import { Users } from './wp-cli/class-users';
+import { Plugins } from './wp-cli/class-plugins';
+import { Themes } from './wp-cli/class-themes';
 
-import { Config } from './class-config';
-
-export class WP_CLI{
-    private _disposable: Disposable;
-    private config: Config;
+export class WP_CLI extends Base{
     private options: any;
 
-    private wp;
-
-    private _onDidChangeData: EventEmitter<undefined> = new EventEmitter<undefined>();
-    readonly onDidChangeData: Event<undefined> = this._onDidChangeData.event;
-
-    version: string;
-    installed: boolean;
-    name: string;
-    url: string;
-    posttypes: Array<any>;
-    taxonomies: Array<any>;
-    roles: Array<any>;
+    sections: any;
 
     constructor(site){
-        this.config = new Config();
+        super();
+
         this.options = { path: site.getRoot() };
+        this.sections = false;
 
-        this.initialize(this.options);
+        this.setup();
     }
 
-    private initialize(options) {
-        commandExists('wp', (err, exists) => {
-            if (err) return;
+    async setup() {
+        this.exists()
+            .then(() => {
+                return this.discover();
+            })
+            .then((wp) => {
+                this.sections = {
+                    'Site': new Info(wp)
+                };
 
-            if (exists) {
-                WP.discover(options, (wp) => {
-                    this.wp = wp;
+                this.sections['Site'].onDidChange(this.modules, this, this._disposable);
+            })
+            .then(() => { this.changed() })
+            .catch(() => { this.changed() });
+    }
 
-                    this.setVersion();
-                })
-            }
+    exists(){
+        return new Promise<string>((resolve, reject) => {
+            commandExists('wp', (err, exists) => {
+                if (err) return reject();
+
+                if (!exists) return reject();
+
+                return resolve(exists);
+            });
         });
     }
 
-    private setVersion() {
-        this.wp.core.version((err, version) => {
-            if (err && !version) return;
+    discover(){
+        return new Promise<string>((resolve, reject) => {
+            WP.discover(this.options, (wp) => {
+                this.wp = wp;
 
-            this.version = version;
-
-            this._onDidChangeData.fire();
-
-            if (version) {
-                this.setInstalled();
-            }
+                return resolve(wp);
+            })
         });
     }
 
-    public getVersion() {
-        return this.version;
-    }
-
-    private setInstalled() {
-        this.wp.core.is_installed((err) => {
-            if (err) return;
-
-            this.installed = true;
-
-            this._onDidChangeData.fire();
-
-            this.setName();
-            this.setURL();
-            this.setPostTypes();
-            this.setTaxonomies();
-            this.setRoles();
-        });
-    }
-
-    public getInstalled() {
-        return this.installed;
-    }
-
-    public getName(){
-        return this.name;
-    }
-
-    private setName() {
-        this.wp.option.get('blogname', (err, name) => {
-            if (err && !name) return;
-
-            this.name = name;
-
-            this._onDidChangeData.fire();
-        });
-    }
-
-    public getURL() {
-        return this.url;
-    }
-
-    private setURL() {
-        this.wp.option.get('siteurl', (err, url) => {
-            if (err && !url) return;
-
-            this.url = url.replace(/(^\w+:|^)\/\//, '');
-
-            this._onDidChangeData.fire();
-        });
-    }
-
-    public hasPostTypes(){
-        return this.posttypes && this.posttypes.length;
-    }
-
-    public getPostTypes(){
-        return this.posttypes;
-    }
-
-    private setPostTypes(){
-        this.wp.post_type.list((err,posttypes) => {
-            if (err && !posttypes) return;
-
-            this.posttypes = posttypes;
-        });
-    }
-
-    public hasTaxonomies() {
-        return this.taxonomies && this.taxonomies.length;
-    }
-
-    public getTaxonomies() {
-        return this.taxonomies;
-    }
-
-    private setTaxonomies() {
-        this.wp.taxonomy.list((err, taxonomies) => {
-            if (err && !taxonomies) return;
-
-            this.taxonomies = taxonomies;
-        });
-    }
-
-    public hasRoles() {
-        return this.roles && this.roles.length;
-    }
-
-    public getRoles() {
-        return this.roles;
-    }
-
-    private setRoles() {
-        this.wp.role.list((err, roles) => {
-            if (err && !roles) return;
-
-            this.roles = roles;
-        });
-    }
-
-    public hasInfo(){
-        let info = this.getInfo();
-
-        for (let key in info) {
-            if (info[key]) return true;
-        }
-    }
-
-    public getInfo(){
-        return {
-            version: this.getVersion(),
-            name: this.getName(),
-            url: this.getURL()
+    modules(){
+        let sections = {
+            'Config': new Config(this.wp),
+            'Post Types': new PostTypes(this.wp),
+            'Taxonomies': new Taxonomies(this.wp),
+            'Roles': new Roles(this.wp),
+            'Users': new Users(this.wp),
+            'Themes': new Themes(this.wp),
+            'Plugins': new Plugins(this.wp)
         };
+
+        for (const section in sections) {
+            sections[section].onDidChange(this.changed, this, this._disposable);
+        }
+
+        this.sections = { ...this.sections, ...sections };
+
+        this.changed();
     }
 
-    public dispose() {
-        this._disposable.dispose();
+    add(element){
+        console.log( element );
+    }
+
+    update(element){
+
+    }
+
+    items(element){
+        if (!this.sections) return [{ uri: this.uri('Loading...') }];
+        
+        if ( !element ) {
+            let items = [];
+            for (const section in this.sections) {
+                items.push({
+                    uri: this.uri(section),
+                    expandable: true,
+                    context: 'section'
+                });
+            }
+            return items;
+        }
+
+        let section = this.section(element.uri);
+        let args    = this.path(element.uri);
+
+        return this.sections[section].items(args);
+    }
+
+    refresh(element){
+        if (!element){
+            for (const section in this.sections) {
+                this.sections[section].refresh()
+            }
+            return
+        }
+
+        let section = this.section(element.uri);
+        let args = this.path(element.uri);
+
+        return this.sections[section].refresh(args);
     }
 }
