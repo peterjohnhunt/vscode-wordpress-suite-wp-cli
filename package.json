@@ -2,7 +2,7 @@
 	"name": "wordpress-suite-wp-cli",
 	"displayName": "WordPress Suite | WP CLI",
 	"description": "",
-	"version": "0.0.2",
+	"version": "0.1.0",
 	"publisher": "peterjohnhunt",
 	"repository": {
 		"type": "git",
@@ -30,48 +30,49 @@
 				}
 			]
 		},
-        "commands": [
-            {
-                "command": "wpcli.sections.refresh",
-                "title": "Refresh",
-                "category": "WP CLI"
-            },
-            {
-                "command": "wpcli.plugins.add",
-                "title": "Add Plugin",
-                "category": "WP CLI"
-            },{
-                "command": "wpcli.plugins.update",
-                "title": "Update Plugin",
-                "category": "WP CLI"
-            }
-        ],
-        "menus": {
-            "view/title": [
-                {
-                    "command": "wpcli.sections.refresh",
-                    "when": "view == wp-cli",
-                    "group": "z_commands@1"
-                },
-                {
-                    "command": "wpcli.plugins.add",
-                    "when": "view == wp-cli",
-                    "group": "z_commands@1"
-                }
-            ],
-            "view/item/context": [
-                {
-                    "command": "wpcli.sections.refresh",
-                    "when": "view == wp-cli && viewItem == section",
-                    "group": "z_commands@1"
-                },
-                {
-                    "command": "wpcli.plugins.update",
-                    "when": "view == wp-cli && viewItem == plugin",
-                    "group": "z_commands@1"
-                }
-            ]
-        }
+		"commands": [
+			{
+				"command": "wpcli.sections.refresh",
+				"title": "Refresh",
+				"category": "WP CLI"
+			},
+			{
+				"command": "wpcli.plugins.add",
+				"title": "Add Plugin",
+				"category": "WP CLI"
+			},
+			{
+				"command": "wpcli.plugins.update",
+				"title": "Update Plugin",
+				"category": "WP CLI"
+			}
+		],
+		"menus": {
+			"view/title": [
+				{
+					"command": "wpcli.sections.refresh",
+					"when": "view == wp-cli",
+					"group": "z_commands@1"
+				},
+				{
+					"command": "wpcli.plugins.add",
+					"when": "view == wp-cli",
+					"group": "z_commands@1"
+				}
+			],
+			"view/item/context": [
+				{
+					"command": "wpcli.sections.refresh",
+					"when": "view == wp-cli && viewItem == section",
+					"group": "z_commands@1"
+				},
+				{
+					"command": "wpcli.plugins.update",
+					"when": "view == wp-cli && viewItem == plugin",
+					"group": "z_commands@1"
+				}
+			]
+		}
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",
